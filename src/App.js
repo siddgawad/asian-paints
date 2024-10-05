@@ -13,6 +13,7 @@ import FlowerSelector from "./components/FlowerSelector";
 import {
   bedroom_bg,
   bedroom,
+  default_img,
   livingroom,
   flower1,
   flower2,
@@ -158,6 +159,16 @@ function App() {
   const [state, setState] = useState(initialState);
   const [cart, setCart] = useLocalStorage("cart", []);
 
+  const getColorOverlay = (color) => {
+    if (!color) return 'rgba(0, 0, 0, 0)';
+    const hex = color.hex.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity for solid color
+  };
+
+
   const handleFlowerSelection = (flowerKey) => {
     const palette = colorPalettes[flowerKey];
     setState((prev) => ({
@@ -212,77 +223,86 @@ function App() {
         <Route
           path="/"
           element={
-            <div className="flex flex-col min-h-screen">
-              <div className="relative top-0 h-[30]">
-                <img
-                  src={bedroom_bg}
-                  className="rounded-6xl object-cover w-full"
-                  alt="room background"
-                />
-                <img
-                  src={bedroom}
-                  className="absolute inset-0 object-contain w-full h-full"
-                  alt="Bedroom"
-                />
-                <div
-                  className="absolute inset-0"
+            <div className="flex flex-col min-h-screen bg-gray-100">
+              <div className="relative h-[50vh] overflow-hidden">
+                {/* Background layer (Image 2) */}
+                <div 
+                  className="absolute inset-0 z-0"
                   style={{
-                    backgroundColor: state.selectedMainWallColor ? state.selectedMainWallColor.hex : 'transparent',
-                    opacity: 0.8, // Adjust this to make the overlay more or less opaque
+                    backgroundColor: getColorOverlay(state.selectedMainWallColor),
+                    maskImage: `url(${bedroom})`,
+                    maskSize: 'contain',
+                    maskRepeat: 'no-repeat',
+                    maskPosition: 'center',
+                    WebkitMaskImage: `url(${bedroom})`,
+                    WebkitMaskSize: 'contain',
+                    WebkitMaskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
                   }}
+                />
+                {/* Foreground layer (Image 1) */}
+                <img
+                  src={default_img}
+                  className="absolute inset-0 z-10 w-full h-full object-contain"
+                  alt="Motorcycle"
                 />
               </div>
 
-              <Header
-                selectedFlower={state.selectedFlower}
-                selectedMainWallColor={state.selectedMainWallColor}
-                selectedSideWallColor={state.selectedSideWallColor}
-                onRoomChange={handleRoomChange}
-              />
+              <div className="container mx-auto px-4 py-8">
+                <Header
+                  selectedFlower={state.selectedFlower}
+                  selectedMainWallColor={state.selectedMainWallColor}
+                  selectedSideWallColor={state.selectedSideWallColor}
+                  onRoomChange={handleRoomChange}
+                />
 
-              <ColorPalette
-                title="Main Wall"
-                colors={state.mainWallColors}
-                selectedColor={state.selectedMainWallColor}
-                onColorSelect={(color) => handleColorSelection("main", color)}
-              />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                  <ColorPalette
+                    title="Main Color"
+                    colors={state.mainWallColors}
+                    selectedColor={state.selectedMainWallColor}
+                    onColorSelect={(color) => handleColorSelection("main", color)}
+                  />
 
-              <ColorPalette
-                title="Side Wall"
-                colors={state.sideWallColors}
-                selectedColor={state.selectedSideWallColor}
-                onColorSelect={(color) => handleColorSelection("side", color)}
-              />
-
-              <FlowerSelector
-                palettes={colorPalettes}
-                selectedFlower={state.selectedFlower}
-                onFlowerSelect={handleFlowerSelection}
-              />
-
-              <div className="grid grid-cols-3">
-                <div className="flex justify-center items-center col-span-2 shadow">
-                  <img src={logo} alt="Asian Paints Logo" className="h-[102px] w-full" />
+                  <ColorPalette
+                    title="Accent Color"
+                    colors={state.sideWallColors}
+                    selectedColor={state.selectedSideWallColor}
+                    onColorSelect={(color) => handleColorSelection("side", color)}
+                  />
                 </div>
 
-                <div className="flex flex-col col-span-1">
-                  <button
-                    onClick={addToCart}
-                    className="flex justify-center items-center shadow h-[50px] bg-blue-500 text-white"
-                  >
-                    Add to Cart {cart.length > 0 && `(${cart.length})`}
-                  </button>
-                  <Link
-                    to="/cart"
-                    className="flex justify-center items-center gap-2 shadow h-[50px] bg-blue-500 text-white"
-                  >
-                    Go to Cart
-                    {cart.length > 0 && (
-                      <span className="bg-red-600 text-white rounded-full px-2 text-xs">
-                        {cart.length}
-                      </span>
-                    )}
-                  </Link>
+                <FlowerSelector
+                  palettes={colorPalettes}
+                  selectedFlower={state.selectedFlower}
+                  onFlowerSelect={handleFlowerSelection}
+                />
+
+                {/* Keep the logo and cart buttons as they were */}
+                <div className="mt-8 grid grid-cols-3">
+                  <div className="col-span-2 flex justify-center items-center shadow">
+                    <img src={logo} alt="Logo" className="h-[102px] w-full object-contain" />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <button
+                      onClick={addToCart}
+                      className="flex justify-center items-center shadow h-[50px] bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+                    >
+                      Add to Cart {cart.length > 0 && `(${cart.length})`}
+                    </button>
+                    <Link
+                      to="/cart"
+                      className="flex justify-center items-center gap-2 shadow h-[50px] bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+                    >
+                      Go to Cart
+                      {cart.length > 0 && (
+                        <span className="bg-red-600 text-white rounded-full px-2 text-xs">
+                          {cart.length}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

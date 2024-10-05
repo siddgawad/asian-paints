@@ -1,4 +1,3 @@
-// src/assets/index.js
 import bedroom_bg from "./bedroom_bg.png";
 import bedroom from "./bedroom.png";
 import livingroom from "./livingroom.jpeg";
@@ -9,8 +8,10 @@ import flower4 from "./flower4.png";
 import flower5 from "./flower5.png";
 import flower6 from "./flower6.png";
 import logo from "./logo.png";
+import default_img from "./default_img.jpg"; // Ensure you have this image
 
 export {
+  default_img,
   bedroom_bg,
   bedroom,
   livingroom,
@@ -20,5 +21,5 @@ export {
   flower4,
   flower5,
   flower6,
-  logo
+  logo,
 };

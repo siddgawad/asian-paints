@@ -16,8 +16,8 @@ const RoomPreview = ({ background, foreground, mainWallColor }) => {
       )}
       <img
         src={foreground}
-        className="absolute inset-0 object-contain w-full h-full"
-        alt="Bedroom foreground"
+        className="absolute inset-0 object-contain w-30 h-20"
+        alt="Bedroom und"
       />
     </div>
   );
