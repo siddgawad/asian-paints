@@ -8,7 +8,7 @@ import flower4 from "./flower4.png";
 import flower5 from "./flower5.png";
 import flower6 from "./flower6.png";
 import logo from "./logo.png";
-import default_img from "./default_img.jpg"; // Ensure you have this image
+import default_img from "./default_img.png"; // Ensure you have this image
 
 export {
   default_img,

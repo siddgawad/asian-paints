@@ -8,6 +8,10 @@ import Cart from "./Cart";
 import ColorPalette from "./components/ColorPalette";
 import Header from "./components/Header";
 import FlowerSelector from "./components/FlowerSelector";
+import Login from "./components/Login";
+import GalleryComponent from './components/GalleryButton';
+import GalleryView from './components/ViewGallery';
+import VideoPlayer from './components/Video';
 
 // Import assets
 import {
@@ -158,24 +162,27 @@ const initialState = {
 function App() {
   const [state, setState] = useState(initialState);
   const [cart, setCart] = useLocalStorage("cart", []);
+  const [gallery, setGallery] = useLocalStorage("gallery", []);
+  const [showVideo, setShowVideo] = useState(true); // State to control video display
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login
 
   const getColorOverlay = (color) => {
-    if (!color) return 'rgba(0, 0, 0, 0)';
-    const hex = color.hex.replace('#', '');
+    if (!color) return "rgba(0, 0, 0, 0)";
+    const hex = color.hex.replace("#", "");
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity for solid color
   };
 
-
   const handleFlowerSelection = (flowerKey) => {
     const palette = colorPalettes[flowerKey];
+    const isSelected = state.selectedFlower === palette.image;
     setState((prev) => ({
       ...prev,
-      selectedFlower: prev.selectedFlower === palette.image ? null : palette.image,
-      mainWallColors: prev.selectedFlower === palette.image ? [] : palette.primary,
-      sideWallColors: prev.selectedFlower === palette.image ? [] : palette.secondary,
+      selectedFlower: isSelected ? null : palette.image,
+      mainWallColors: isSelected ? [] : palette.primary,
+      sideWallColors: isSelected ? [] : palette.secondary,
       selectedMainWallColor: null,
       selectedSideWallColor: null,
     }));
@@ -184,7 +191,7 @@ function App() {
   const handleColorSelection = (type, color) => {
     setState((prev) => ({
       ...prev,
-      [type === "main" ? "selectedMainWallColor" : "selectedSideWallColor"]:
+      [type === "main" ? "selectedMainWallColor" : "selectedSideWallColor"]: 
         prev[type === "main" ? "selectedMainWallColor" : "selectedSideWallColor"]?.hex === color.hex
           ? null
           : color,
@@ -198,7 +205,7 @@ function App() {
     }));
   };
 
-  const addToCart = () => {
+  const addToGallery = () => {
     const { selectedMainWallColor, selectedSideWallColor, selectedFlower } = state;
 
     if (selectedMainWallColor || selectedSideWallColor) {
@@ -209,103 +216,131 @@ function App() {
           : "Custom",
         mainWall: selectedMainWallColor?.name || "None",
         sideWall: selectedSideWallColor?.name || "None",
-        quantity: 1,
         image: selectedFlower || "placeholder-image.png",
       };
-      setCart([...cart, newItem]);
+      setGallery((prevGallery) => [...prevGallery, newItem]);
+      // Add the same item to the cart
+      setCart((prevCart) => [...prevCart, newItem]);
+    } else {
+      alert("Please select at least one wall color before adding to gallery.");
     }
+  };
+
+  const handleRemove = (id) => {
+    setGallery(prevGallery => prevGallery.filter(item => item.id !== id));
+    setCart(prevCart => prevCart.filter(item => item.id !== id));
+  };
+  console.log('handleRemove function:', handleRemove);
+
+
+  // Function to handle video end
+  const handleVideoEnd = () => {
+    setShowVideo(false); // Hide video when it ends
+  };
+  // Function to handle successful login
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
   };
 
   return (
     <Router>
       <Routes>
-        <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
+        <Route
+          path="/gallery"
+          element={<GalleryView gallery={gallery} onRemove={handleRemove} />}
+        />
+        <Route
+          path="/cart"
+          element={<Cart cart={cart} setCart={setCart} />}
+        />
         <Route
           path="/"
           element={
-            <div className="flex flex-col min-h-screen bg-gray-100">
-              <div className="relative h-[50vh] overflow-hidden">
-                {/* Background layer (Image 2) */}
-                <div 
-                  className="absolute inset-0 z-0"
-                  style={{
-                    backgroundColor: getColorOverlay(state.selectedMainWallColor),
-                    maskImage: `url(${bedroom})`,
-                    maskSize: 'contain',
-                    maskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskImage: `url(${bedroom})`,
-                    WebkitMaskSize: 'contain',
-                    WebkitMaskRepeat: 'no-repeat',
-                    WebkitMaskPosition: 'center',
-                  }}
-                />
-                {/* Foreground layer (Image 1) */}
-                <img
-                  src={default_img}
-                  className="absolute inset-0 z-10 w-full h-full object-contain"
-                  alt="Motorcycle"
-                />
+            <>
+            {/* {showVideo ? (
+              <div className="App">
+                <h1>Video Upload Example</h1>
+                <VideoPlayer onVideoEnd={handleVideoEnd} />
               </div>
-
-              <div className="container mx-auto px-4 py-8">
-                <Header
-                  selectedFlower={state.selectedFlower}
-                  selectedMainWallColor={state.selectedMainWallColor}
-                  selectedSideWallColor={state.selectedSideWallColor}
-                  onRoomChange={handleRoomChange}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                  <ColorPalette
-                    title="Main Color"
-                    colors={state.mainWallColors}
-                    selectedColor={state.selectedMainWallColor}
-                    onColorSelect={(color) => handleColorSelection("main", color)}
-                  />
-
-                  <ColorPalette
-                    title="Accent Color"
-                    colors={state.sideWallColors}
-                    selectedColor={state.selectedSideWallColor}
-                    onColorSelect={(color) => handleColorSelection("side", color)}
-                  />
+            ) : isLoggedIn ? ( // If logged in, show the main app
+              <>
+                <div className="relative h-[50vh] overflow-hidden">
+                  <img
+                    src={default_img}
+                    className="absolute inset-0 z-10 w-full h-full object-contain"
+                    alt="Motorcycle"
+                  / */}
+                  
+              {showVideo ? ( // Conditional rendering based on state
+                <div className="App">
+                  <h1>Video Upload Example</h1>
+                  <VideoPlayer onVideoEnd={handleVideoEnd} />
                 </div>
+              ) : (
+                <>
+                  <div className="relative h-[50vh] overflow-hidden">
+                    {/* Foreground layer (Image 1) */}
+                    <img
+                      src={default_img}
+                      className="absolute inset-0 z-10 w-full h-full object-contain"
+                      alt="Motorcycle"
+                    />
 
-                <FlowerSelector
-                  palettes={colorPalettes}
-                  selectedFlower={state.selectedFlower}
-                  onFlowerSelect={handleFlowerSelection}
-                />
-
-                {/* Keep the logo and cart buttons as they were */}
-                <div className="mt-8 grid grid-cols-3">
-                  <div className="col-span-2 flex justify-center items-center shadow">
-                    <img src={logo} alt="Logo" className="h-[102px] w-full object-contain" />
+                    {/* Background layer (Image 2) */}
+                    <div
+                      className="absolute inset-0 z-20"
+                      style={{
+                        maskImage: `url(${bedroom})`,
+                        maskSize: 'contain',
+                        maskRepeat: 'no-repeat',
+                        maskPosition: 'center',
+                        WebkitMaskImage: `url(${bedroom})`,
+                        WebkitMaskSize: 'contain',
+                        WebkitMaskRepeat: 'no-repeat',
+                        WebkitMaskPosition: 'center',
+                        backgroundColor: getColorOverlay(state.selectedMainWallColor),
+                      }}
+                    />
                   </div>
 
-                  <div className="flex flex-col">
-                    <button
-                      onClick={addToCart}
-                      className="flex justify-center items-center shadow h-[50px] bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
-                    >
-                      Add to Cart {cart.length > 0 && `(${cart.length})`}
-                    </button>
-                    <Link
-                      to="/cart"
-                      className="flex justify-center items-center gap-2 shadow h-[50px] bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
-                    >
-                      Go to Cart
-                      {cart.length > 0 && (
-                        <span className="bg-red-600 text-white rounded-full px-2 text-xs">
-                          {cart.length}
-                        </span>
-                      )}
-                    </Link>
+                  <div className="container mx-auto px-4 py-8">
+                    <Header
+                      selectedFlower={state.selectedFlower}
+                      selectedMainWallColor={state.selectedMainWallColor}
+                      selectedSideWallColor={state.selectedSideWallColor}
+                      onRoomChange={handleRoomChange}
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                      <ColorPalette
+                        title="Main Color"
+                        colors={state.mainWallColors}
+                        selectedColor={state.selectedMainWallColor}
+                        onColorSelect={(color) => handleColorSelection("main", color)}
+                      />
+
+                      <ColorPalette
+                        title="Accent Color"
+                        colors={state.sideWallColors}
+                        selectedColor={state.selectedSideWallColor}
+                        onColorSelect={(color) => handleColorSelection("side", color)}
+                      />
+                    </div>
+
+                    <FlowerSelector
+                      palettes={colorPalettes}
+                      selectedFlower={state.selectedFlower}
+                      onFlowerSelect={handleFlowerSelection}
+                    />
+
+                    <GalleryView gallery={gallery} onRemove={handleRemove} />
+                    <GalleryComponent addToGallery={addToGallery} galleryCount={gallery.length} />
+
+                    <Login onLoginSuccess={handleLoginSuccess} />
                   </div>
-                </div>
-              </div>
-            </div>
+                </>
+              )}
+            </>
           }
         />
       </Routes>

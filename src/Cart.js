@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Trash2 } from 'lucide-react';
 import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
 
 const CartItem = ({ item, onRemove, onQuantityChange }) => (
   <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow mb-4">
@@ -33,7 +34,7 @@ const Cart = ({ cart, setCart }) => {
   };
 
   const changeQuantity = (id, change) => {
-    setCart(cart.map(item => 
+    setCart(cart.map(item =>
       item.id === id ? { ...item, quantity: Math.max(1, item.quantity + change) } : item
     ));
   };
@@ -43,26 +44,145 @@ const Cart = ({ cart, setCart }) => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    let yOffset = 20;
-
-    doc.setFontSize(20);
-    doc.text("Asian Paints - Color Selection", 20, yOffset);
-    yOffset += 20;
-
-    cart.forEach((item, index) => {
-      doc.setFontSize(14);
-      doc.text(`${index + 1}. ${item.name}`, 20, yOffset);
-      yOffset += 10;
-      doc.setFontSize(12);
-      doc.text(`Primary shade: ${item.mainWall}`, 30, yOffset);
-      yOffset += 10;
-      doc.text(`Secondary shade: ${item.sideWall}`, 30, yOffset);
-      yOffset += 10;
-      doc.text(`Quantity: ${item.quantity}`, 30, yOffset);
-      yOffset += 20;
+    
+    // Set document properties
+    doc.setProperties({
+      title: 'Asian Paints - Color Selection',
+      subject: 'Cart Summary',
+      author: 'Asian Paints',
+      keywords: 'paint, colors, selection',
+      creator: 'Asian Paints Web Application'
     });
-
-    doc.save("asian-paints-selection.pdf");
+  
+    // Add header
+    doc.setFontSize(24);
+    doc.setTextColor(41, 128, 185); // Professional blue color
+    doc.setFont("helvetica", "bold");
+    doc.text("Asian Paints", 20, 20);
+    doc.setFontSize(18);
+    doc.setTextColor(70, 70, 70); // Dark gray
+    doc.setFont("helvetica", "normal");
+    doc.text("Color Selection", 20, 30);
+  
+    // Add horizontal line
+    doc.setDrawColor(200, 200, 200); // Light gray
+    doc.line(20, 35, 190, 35);
+  
+    // Add date and reference number
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100); // Medium gray
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 45);
+    doc.text(`Ref: AP${Math.random().toString(36).substr(2, 9).toUpperCase()}`, 20, 51);
+  
+    // Add summary
+    doc.setFontSize(12);
+    doc.setTextColor(70, 70, 70); // Dark gray
+    doc.setFont("helvetica", "bold");
+    doc.text("Order Summary", 20, 65);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Items: ${totalItems}`, 20, 75);
+    doc.text(`Total Shades: ${totalShades}`, 20, 82);
+  
+    // Prepare data for the table
+    const tableData = cart.map(item => [
+      item.name,
+      item.mainWall,
+      item.sideWall,
+      item.quantity.toString()
+    ]);
+    
+    // Add table
+    doc.autoTable({
+      startY: 90,
+      head: [['Flower', 'Primary Shade', 'Secondary Shade', 'Quantity']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      bodyStyles: {
+        textColor: 70,
+        fontSize: 10
+      },
+      alternateRowStyles: { fillColor: [245, 250, 254] },
+      columnStyles: {
+        0: { cellWidth: 50 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 'auto', halign: 'center' }
+      },
+      margin: { top: 20, bottom: 20 },
+      didDrawPage: function(data) {
+        // Header
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text("Asian Paints - Color Selection", data.settings.margin.left, 10);
+  
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(`Page ${data.pageNumber} of ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+      }
+    });
+    
+    // Add images in a single line
+    let yOffset = doc.lastAutoTable.finalY + 20;
+    const imageSize = 30; // Reduced image size
+    const imagesPerRow = 5; // Number of images per row
+    const spacing = 10; // Spacing between images
+  
+    for (let i = 0; i < cart.length; i += imagesPerRow) {
+      if (yOffset > 250) {
+        doc.addPage();
+        yOffset = 20;
+      }
+  
+      const rowItems = cart.slice(i, i + imagesPerRow);
+      let xOffset = 20;
+  
+      rowItems.forEach((item) => {
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(70, 70, 70);
+        doc.text(item.name, xOffset, yOffset, { maxWidth: imageSize + spacing });
+        
+        doc.setFontSize(6);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100, 100, 100);
+        doc.text(`P: ${item.mainWall}`, xOffset, yOffset + 8, { maxWidth: imageSize + spacing });
+        doc.text(`S: ${item.sideWall}`, xOffset, yOffset + 12, { maxWidth: imageSize + spacing });
+  
+        try {
+          doc.addImage(item.image, 'JPEG', xOffset, yOffset + 16, imageSize, imageSize);
+        } catch (error) {
+          console.error(`Failed to add image for ${item.name}:`, error);
+          doc.setFontSize(6);
+          doc.setTextColor(150, 150, 150);
+          doc.text('Image not available', xOffset, yOffset + 26, { maxWidth: imageSize });
+        }
+  
+        xOffset += imageSize + spacing;
+      });
+  
+      yOffset += imageSize + 40; // Move to the next row
+    }
+    
+    // Add a thank you note
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(41, 128, 185);
+    doc.text("Thank You for Your Selection!", 105, 20, null, null, "center");
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(70, 70, 70);
+    const thankYouText = "We appreciate your trust in Asian Paints. Our team is dedicated to bringing your color vision to life. If you have any questions about your selection or need further assistance, please don't hesitate to contact our customer service.";
+    doc.text(thankYouText, 20, 40, { maxWidth: 170, align: "justify" });
+    
+    doc.save("asian-paints-color-selection.pdf");
   };
 
   return (
@@ -81,10 +201,10 @@ const Cart = ({ cart, setCart }) => {
 
       <div className="flex-grow">
         {cart.map(item => (
-          <CartItem 
-            key={item.id} 
-            item={item} 
-            onRemove={removeItem} 
+          <CartItem
+            key={item.id}
+            item={item}
+            onRemove={removeItem}
             onQuantityChange={changeQuantity}
           />
         ))}
@@ -105,7 +225,7 @@ const Cart = ({ cart, setCart }) => {
         </div>
       </div>
 
-      <button 
+      <button
         className="mt-4 bg-indigo-600 text-white py-3 rounded-lg font-semibold"
         onClick={downloadPDF}
       >
