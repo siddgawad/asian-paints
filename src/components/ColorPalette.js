@@ -3,9 +3,9 @@ import React from 'react';
 const ColorPalette = ({ title, colors, selectedColor, onColorSelect }) => {
   return (
     <div className="grid gap-1 grid-cols-6 mt-2 ml-2 mr-2">
-      <div className="min-h-[10px] bg-black text-white mt-2 col-span-6 text-center">
+      {/* <div className="min-h-[10px] bg-black text-white mt-2 col-span-6 text-center">
         {title}
-      </div>
+      </div> */}
       {colors?.length > 0 ? (
         colors.map((color, index) => (
           <div

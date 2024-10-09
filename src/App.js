@@ -5,21 +5,25 @@ import Cookies from 'js-cookie';
 import "./App.css";
 // Import components
 import Cart from "./Cart";
-import Header from "./components/Header";
 import Login from "./components/Login";
 import VideoPlayer from './components/Video';
 import MainContent from './components/MainContent';
 // Import assets and color palettes
 import { bedroom, livingroom } from "./assets";
 import colorPalettes from './data/colorPalettes';
+
+
 const initialState = {
-  selectedFlower: null,
+  selectedMainFlower: null,
+  selectedAccentFlower: null,
   selectedMainWallColor: null,
   selectedSideWallColor: null,
   selectedRoom: bedroom,
   mainWallColors: [],
   sideWallColors: [],
 };
+
+
 function App() {
   const [state, setState] = useState(initialState);
   const [cart, setCart] = useLocalStorage("cart", []);
@@ -27,6 +31,8 @@ function App() {
   const [showVideo, setShowVideo] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+
+
   useEffect(() => {
     const userCookie = Cookies.get('user');
     if (userCookie) {
@@ -55,16 +61,13 @@ function App() {
     const b = parseInt(hex.substring(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, 1)`;
   };
-  const handleFlowerSelection = (flowerKey) => {
+  const handleFlowerSelection = (type, flowerKey) => {
     const palette = colorPalettes[flowerKey];
-    const isSelected = state.selectedFlower === palette.image;
     setState((prev) => ({
       ...prev,
-      selectedFlower: isSelected ? null : palette.image,
-      mainWallColors: isSelected ? [] : palette.primary,
-      sideWallColors: isSelected ? [] : palette.secondary,
-      selectedMainWallColor: null,
-      selectedSideWallColor: null,
+      [type === 'main' ? 'selectedMainFlower' : 'selectedAccentFlower']: palette.image,
+      [type === 'main' ? 'mainWallColors' : 'sideWallColors']: palette.primary,
+      [type === 'main' ? 'selectedMainWallColor' : 'selectedSideWallColor']: null,
     }));
   };
   const handleColorSelection = (type, color) => {
@@ -76,12 +79,7 @@ function App() {
           : color,
     }));
   };
-  const handleRoomChange = (roomType) => {
-    setState((prev) => ({
-      ...prev,
-      selectedRoom: roomType === "bedroom" ? bedroom : livingroom,
-    }));
-  };
+  
   const addToCart = () => {
     const { selectedMainWallColor, selectedSideWallColor, selectedFlower } = state;
     if (selectedMainWallColor || selectedSideWallColor) {
@@ -122,14 +120,10 @@ function App() {
   };
   const Main = () => (
     <>
-      <Header
-        selectedFlower={state.selectedFlower}
-        selectedMainWallColor={state.selectedMainWallColor}
-        selectedSideWallColor={state.selectedSideWallColor}
-        onRoomChange={handleRoomChange}
-      />
+      
       <MainContent
         state={state}
+        setState={setState}
         getColorOverlay={getColorOverlay}
         handleColorSelection={handleColorSelection}
         handleFlowerSelection={handleFlowerSelection}
@@ -139,6 +133,7 @@ function App() {
         colorPalettes={colorPalettes}
         userData={userData}
       />
+      
     </>
   );
   return (

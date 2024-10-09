@@ -47,9 +47,8 @@ const Cart = ({ cart, setCart }) => {
   const downloadPDF = async () => {
     const doc = new jsPDF();
   
-    // Set document properties
     doc.setProperties({
-      title: 'Asian Paints - Color Selection',
+      title: 'Asian Paints - Cart Summary',
       subject: 'Cart Summary',
       author: 'Asian Paints',
       keywords: 'paint, colors, selection',
@@ -77,37 +76,20 @@ const Cart = ({ cart, setCart }) => {
       });
     };
   
-    // Add header
     doc.setFontSize(24);
     doc.setTextColor(41, 128, 185);
     doc.setFont("helvetica", "bold");
     doc.text("Asian Paints", 20, 20);
-    doc.setFontSize(18);
-    doc.setTextColor(70, 70, 70);
-    doc.setFont("helvetica", "normal");
-    doc.text("Color Selection", 20, 30);
   
-    // Add horizontal line
     doc.setDrawColor(200, 200, 200);
-    doc.line(20, 35, 190, 35);
+    doc.line(20, 25, 190, 25);
   
-    // Add date and reference number
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 45);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 35);
   
-    // Add summary
-    doc.setFontSize(12);
-    doc.setTextColor(70, 70, 70);
-    doc.setFont("helvetica", "bold");
-    doc.text("Order Summary", 20, 65);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Total Items: ${cart.length}`, 20, 75);
-    doc.text(`Total Shades: ${cart.reduce((sum, item) => sum + (item.mainWall !== 'None' ? 1 : 0) + (item.sideWall !== 'None' ? 1 : 0), 0)}`, 20, 82);
-  
-    // Add images and details
-    let yOffset = 100;
-    const imageSize = 40;
+    let yOffset = 45;
+    const imageSize = 30;
     const cornerRadius = 5;
   
     for (const item of cart) {
@@ -116,12 +98,10 @@ const Cart = ({ cart, setCart }) => {
         yOffset = 20;
       }
   
-      // Draw rounded rectangle
       doc.setDrawColor(200, 200, 200);
       doc.setFillColor(245, 245, 245);
       doc.roundedRect(20, yOffset, imageSize, imageSize, cornerRadius, cornerRadius, 'FD');
   
-      // Add image
       try {
         await addImageToPDF(item.image, 20, yOffset, imageSize, imageSize);
       } catch (error) {
@@ -132,46 +112,41 @@ const Cart = ({ cart, setCart }) => {
         doc.text('Image', 20 + imageSize / 2, yOffset + imageSize / 2, { align: 'center', baseline: 'middle' });
       }
   
-      // Add item details
       doc.setFontSize(12);
       doc.setTextColor(70, 70, 70);
       doc.setFont("helvetica", "bold");
-      doc.text(item.name, 70, yOffset + 10);
+      doc.text(item.name, 60, yOffset + 8);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Primary Shade: ${item.mainWall}`, 70, yOffset + 20);
-      doc.text(`Secondary Shade: ${item.sideWall}`, 70, yOffset + 30);
-      doc.text(`Quantity: ${item.quantity || 1}`, 70, yOffset + 40);
+      doc.text(`Primary: ${item.mainWall}`, 60, yOffset + 16);
+      doc.text(`Secondary: ${item.sideWall}`, 60, yOffset + 24);
+      doc.text(`Quantity: ${item.quantity || 1}`, 60, yOffset + 32);
   
       yOffset += imageSize + 10;
     }
   
     const logoSize = 60;
-const logoSpacing = 40;
-const totalLogoWidth = logoSize * 2 + logoSpacing;
-const startX = (doc.internal.pageSize.width - totalLogoWidth) / 2;
-const startY = doc.internal.pageSize.height - 60;
+    const logoSpacing = 40;
+    const totalLogoWidth = logoSize * 2 + logoSpacing;
+    const startX = (doc.internal.pageSize.width - totalLogoWidth) / 2;
+    const startY = doc.internal.pageSize.height - 50;
 
-const addLogo = async (logoSrc, x, y) => {
-  try {
-    await addImageToPDF(logoSrc, x, y, logoSize, logoSize); // Use logoSrc directly here
-  } catch (error) {
-    console.error('Failed to add logo:', error);
-    // Optionally, add a placeholder or text instead of the logo
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text(logoSrc === Logo1 ? 'Logo1' : 'Logo2', x + logoSize / 2, y + logoSize / 2, { align: 'center', baseline: 'middle' });
-  }
-};
+    const addLogo = async (logoSrc, x, y) => {
+      try {
+        await addImageToPDF(logoSrc, x, y, logoSize, logoSize);
+      } catch (error) {
+        console.error('Failed to add logo:', error);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(logoSrc === Logo1 ? 'Logo1' : 'Logo2', x + logoSize / 2, y + logoSize / 2, { align: 'center', baseline: 'middle' });
+      }
+    };
 
-// Add first logo
-await addLogo(Logo1, startX, startY);
+    await addLogo(Logo1, startX, startY);
+    await addLogo(Logo2, startX + logoSize + logoSpacing, startY);
 
-// Add second logo
-await addLogo(Logo2, startX + logoSize + logoSpacing, startY);
-
-doc.save("asian-paints-color-selection.pdf");
-};
+    doc.save("asian-paints-cart-summary.pdf");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 p-4">
@@ -199,22 +174,22 @@ doc.save("asian-paints-color-selection.pdf");
       </div>
 
       <div className="bg-white rounded-lg shadow p-4 mt-4">
-        <div className="flex justify-between mb-2">
+        <div className="flex justify-between font-semibold mb-2 text-xs">
           <span>Selected items</span>
           <span>{totalItems}</span>
         </div>
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-between font-semibold mb-4 text-xs">
           <span>Total shades</span>
           <span>{totalShades}</span>
         </div>
-        <div className="flex justify-between font-semibold">
+        <div className="flex justify-between text-xl">
           <span>Subtotal</span>
           <span>{totalItems}</span>
         </div>
       </div>
 
       <button
-        className="mt-4 bg-indigo-600 text-white py-3 rounded-lg font-semibold"
+        className="mt-4 bg-indigo-600 text-white py-3 px-5 rounded-xl font-semibold"
         onClick={downloadPDF}
       >
         Download PDF
