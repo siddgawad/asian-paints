@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png'; // Adjust the path as needed
-import GalleryView from './ViewGallery'; // Import GalleryView
 
-const GalleryComponent = ({ addToGallery, galleryCount, gallery, onRemove }) => {
+const GalleryComponent = ({ addToCart, cartCount }) => {
   return (
     <div className="flex flex-col gap-4 mt-8">
       <div className="flex items-center">
@@ -12,7 +11,7 @@ const GalleryComponent = ({ addToGallery, galleryCount, gallery, onRemove }) => 
         </div>
         <div className="w-[40%] flex justify-end">
           <button
-            onClick={addToGallery}
+            onClick={addToCart}
             className="bg-blue-500 text-white px-4 py-2 rounded whitespace-nowrap"
           >
             Add to Gallery
@@ -21,9 +20,9 @@ const GalleryComponent = ({ addToGallery, galleryCount, gallery, onRemove }) => 
       </div>
       <div className="flex justify-center">
         <Link
-          to="/gallery"
+          to="/cart"
           className="bg-green-500 text-white p-2 rounded flex items-center justify-center relative w-full"
-          aria-label="View Gallery"
+          aria-label="View Cart"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -37,18 +36,17 @@ const GalleryComponent = ({ addToGallery, galleryCount, gallery, onRemove }) => 
             strokeLinejoin="round"
             className="w-6 h-6"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
-          {galleryCount > 0 && (
+          {cartCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
-              {galleryCount}
+              {cartCount}
             </span>
           )}
         </Link>
       </div>
-      <GalleryView gallery={gallery} onRemove={onRemove} />
     </div>
   );
 };
