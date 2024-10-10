@@ -81,16 +81,16 @@ function App() {
   };
   
   const addToCart = () => {
-    const { selectedMainWallColor, selectedSideWallColor, selectedFlower } = state;
+    const { selectedMainWallColor, selectedSideWallColor, selectedMainFlower, selectedAccentFlower } = state;
     if (selectedMainWallColor || selectedSideWallColor) {
+      const selectedFlower = selectedMainFlower || selectedAccentFlower;
+      const flowerKey = Object.keys(colorPalettes).find((key) => colorPalettes[key].image === selectedFlower);
       const newItem = {
         id: Date.now(),
-        name: selectedFlower
-          ? Object.keys(colorPalettes).find((key) => colorPalettes[key].image === selectedFlower)
-          : "Custom",
+        name: flowerKey || "Custom",
         mainWall: selectedMainWallColor?.name || "None",
         sideWall: selectedSideWallColor?.name || "None",
-        image: selectedFlower || "placeholder-image.png",
+        image: selectedFlower || "/placeholder-image.png",
         quantity: 1,
       };
       const updatedCart = [...cart, newItem];

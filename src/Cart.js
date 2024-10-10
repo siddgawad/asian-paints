@@ -6,29 +6,41 @@ import 'jspdf-autotable';
 import Logo1 from './assets/logo1.png';
 import Logo2 from './assets/logo2.png';
 
-const CartItem = ({ item, onRemove, onQuantityChange }) => (
-  <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow mb-4">
-    <div className="flex items-center space-x-4">
-      <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
-      <div>
-        <h3 className="font-semibold">{item.name}</h3>
-        <p className="text-sm text-gray-500">
-          Primary shade: {item.mainWall}, Secondary shade: {item.sideWall}
-        </p>
+const CartItem = ({ item, onRemove, onQuantityChange }) => {
+  if (!item) return null;
+  
+  return (
+    <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow mb-4">
+      <div className="flex items-center space-x-4">
+        <img 
+          src={item.image || "/placeholder-image.png"} 
+          alt={item.name || "Product"} 
+          className="w-16 h-16 rounded-md object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/placeholder-image.png";
+          }}
+        />
+        <div>
+          <h3 className="font-semibold">{item.name || "Unknown Product"}</h3>
+          <p className="text-sm text-gray-500">
+            Primary shade: {item.mainWall || "None"}, Secondary shade: {item.sideWall || "None"}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <button onClick={() => onQuantityChange(item.id, -1)} className="text-gray-500">-</button>
+          <span>{item.quantity || 1}</span>
+          <button onClick={() => onQuantityChange(item.id, 1)} className="text-gray-500">+</button>
+        </div>
+        <button onClick={() => onRemove(item.id)} className="text-red-500">
+          <Trash2 size={20} />
+        </button>
       </div>
     </div>
-    <div className="flex items-center space-x-4">
-      <div className="flex items-center space-x-2">
-        <button onClick={() => onQuantityChange(item.id, -1)} className="text-gray-500">-</button>
-        <span>{item.quantity || 1}</span>
-        <button onClick={() => onQuantityChange(item.id, 1)} className="text-gray-500">+</button>
-      </div>
-      <button onClick={() => onRemove(item.id)} className="text-red-500">
-        <Trash2 size={20} />
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 const Cart = ({ cart, setCart }) => {
   const removeItem = (id) => {
@@ -64,8 +76,8 @@ const Cart = ({ cart, setCart }) => {
           canvas.height = img.height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
-          const dataURL = canvas.toDataURL('image/jpeg');
-          doc.addImage(dataURL, 'JPEG', x, y, width, height);
+          const dataURL = canvas.toDataURL('image/png');
+          doc.addImage(dataURL, 'PNG', x, y, width, height);
           resolve();
         };
         img.onerror = () => {
@@ -151,7 +163,7 @@ const Cart = ({ cart, setCart }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 p-4">
       <div className="flex items-center mb-6">
-        <Link to="/" className="text-gray-600">
+        <Link to="/main" className="text-gray-600">
           <ChevronLeft size={24} />
         </Link>
         <h1 className="text-2xl font-bold ml-4">Gallery</h1>
@@ -163,15 +175,15 @@ const Cart = ({ cart, setCart }) => {
       </div>
 
       <div className="flex-grow">
-        {cart.map(item => (
-          <CartItem
-            key={item.id}
-            item={item}
-            onRemove={removeItem}
-            onQuantityChange={changeQuantity}
-          />
-        ))}
-      </div>
+  {cart.map(item => (
+    <CartItem
+      key={item.id}
+      item={item}
+      onRemove={removeItem}
+      onQuantityChange={changeQuantity}
+    />
+  ))}
+</div>
 
       <div className="bg-white rounded-lg shadow p-4 mt-4">
         <div className="flex justify-between font-semibold mb-2 text-xs">
@@ -188,12 +200,15 @@ const Cart = ({ cart, setCart }) => {
         </div>
       </div>
 
-      <button
-        className="mt-4 bg-indigo-600 text-white py-3 px-5 rounded-xl font-semibold"
+      <div className="flex justify-center items-center">
+    <button
+        className="mt-4 bg-indigo-600 text-white py-2 px-6 w-64 rounded-full font-semibold text-xl" // Adjusted padding and width
         onClick={downloadPDF}
-      >
+    >
         Download PDF
-      </button>
+    </button>
+</div>
+
     </div>
   );
 };

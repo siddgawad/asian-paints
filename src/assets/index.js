@@ -1,6 +1,6 @@
 import bedroom_bg from "./bedroom_bg.png";
 import bedroom from "./bedroom.png";
-import livingroom from "./livingroom.jpeg";
+import livingroom from "./livingroom.png";
 import flower1 from "./flower1.png";
 import flower2 from "./flower2.png";
 import flower3 from "./flower3.png";

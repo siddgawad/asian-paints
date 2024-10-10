@@ -2,13 +2,13 @@ import React from 'react';
 
 const FlowerSelector = ({ palettes, selectedFlower, onFlowerSelect }) => {
   return (
-    <div className="grid gap-1 grid-cols-6 ml-2 mr-2 mb-2">
+    <div className="flex space-x-2 ml-2 mr-2 mb-2">
       {Object.keys(palettes).map((key) => {
         const palette = palettes[key];
         return (
           <div
             key={key}
-            className="flex justify-center items-center col-span-1 h-[70px]"
+            className="flex-shrink-0"
           >
             <button
               onClick={() => onFlowerSelect(palette)}
@@ -18,7 +18,7 @@ const FlowerSelector = ({ palettes, selectedFlower, onFlowerSelect }) => {
             >
               <img
                 src={palette.image}
-                className="object-contain w-full h-full"
+                className="object-contain w-16 h-16"
                 alt={`${palette.name} flower`}
               />
             </button>
@@ -30,3 +30,26 @@ const FlowerSelector = ({ palettes, selectedFlower, onFlowerSelect }) => {
 };
 
 export default FlowerSelector;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

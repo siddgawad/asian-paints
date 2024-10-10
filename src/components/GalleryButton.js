@@ -1,29 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png'; // Adjust the path as needed
-import logo2 from '../assets/logo_top.png';
 
 const GalleryComponent = ({ addToCart, cartCount }) => {
   return (
     <div className="flex flex-col gap-4 mt-8">
-      <div className="flex items-center">
-        <div className="w-[58%] pr-4">
-        {/* <img src={logo2} alt="Logo" className="h-[18px] w-full object-contain" /> */}
-          <img src={logo} alt="Logo" className="h-[102px] w-full object-contain" />
-        </div>
-        <div className="w-[40%] flex justify-end">
-          <button
-            onClick={addToCart}
-            className="bg-blue-500 text-white px-4 py-2 rounded whitespace-nowrap"
-          >
-            Add to Gallery
-          </button>
-        </div>
-      </div>
+      
       <div className="flex justify-center">
         <Link
           to="/cart"
-          className="bg-green-500 text-white p-2 rounded flex items-center justify-center relative w-10"
+          className="bg-green-500 bottom-8 text-white p-2 rounded flex items-center justify-center relative w-10"
           aria-label="View Cart"
         >
           <svg
