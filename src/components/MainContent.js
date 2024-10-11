@@ -7,6 +7,7 @@ import { default_img } from '../assets';
 import Header from "./Header";
 import { bedroom, livingroom } from "../assets";
 import logo from '../assets/logo.png'; // Adjust the path as needed
+import { Plus } from 'lucide-react';
 
 const MainContent = ({
   state,
@@ -122,21 +123,22 @@ const MainContent = ({
         </div>
       </div>
       {/* add to gallery */}
-      <div className="flex items-center">
+      <div className="flex items-center mx-auto px-4 py-2">
         <div className="w-[58%] pr-4">
         {/* <img src={logo2} alt="Logo" className="h-[18px] w-full object-contain" /> */}
           <img src={logo} alt="Logo" className="h-[102px] w-full object-contain" />
         </div>
         <div className="w-[40%] flex justify-end">
-          <button
-            onClick={addToCart}
-            className="bg-blue-500 text-white px-4 py-2 rounded whitespace-nowrap"
-          >
-            Add to Gallery
-          </button>
-        </div>
-      </div>
-    </div>
+        <button
+  onClick={addToCart}
+  className="flex items-center justify-center bg-gray-800 text-white rounded-full py-2 px-4 hover:bg-gray-700 transition-colors duration-200"
+>
+  <Plus size={20} />
+  <span className="font-semibold">Add to Gallery</span>
+</button>
+          </div>
+          </div>
+          </div>
   );
 };
 

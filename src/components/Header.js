@@ -1,5 +1,6 @@
 import React from 'react';
 import colorPalettes from '../data/colorPalettes';
+import RoomSelector from './RoomSelector';
 
 const Header = ({
   selectedMainFlower,
@@ -26,46 +27,45 @@ const Header = ({
     return { hex: '', name: 'Unknown flower', primaryColor: '' };
   };
 
-  const { hex, name, primaryColor } = getFlowerDetails(selectedFlower);
+  const { hex, } = getFlowerDetails(selectedFlower);
 
   return (
-    <div className="grid gap-1 grid-cols-6 mt-2 ml-2 mr-2">
-      <div className="flex justify-center items-center col-span-1 h-[40px] border border-black">
-        {selectedFlower ? (
-          <img
-            src={selectedFlower}
-            alt="Selected flower"
-            className="h-full w-full object-contain"
-          />
-        ) : (
-          <span>No flower selected</span>
+    <div className="flex justify-between flex-wrap gap-2">
+  {/* Flower name and color details section */}
+  <div className="flex flex-col justify-center items-center col-span-3 h-[40px] text-xl">
+    {selectedFlower ? (
+      <div className="flex flex-col items-start w-full">
+        {/* Display Main wall color on top with hex code immediately after */}
+        {selectedMainWallColor && (
+          <div className="mr-2 text-base flex items-center">
+            Main: {selectedMainWallColor.name}
+            <span className="text-xs ml-2" style={{ color: 'black' }}>
+              {hex}
+            </span>
+          </div>
+        )}
+
+        {/* Display Side wall color below Main with hex code immediately after */}
+        {selectedSideWallColor && (
+          <div className="mr-2 text-base flex items-center">
+            Side: {selectedSideWallColor.name}
+            <span className="text-xs ml-2" style={{ color: 'black' }}>
+              {hex}
+            </span>
+          </div>
         )}
       </div>
-      <div className="flex flex-col justify-center items-center col-span-3 h-[40px] border border-black text-center">
-        {selectedFlower ? (
-          <>
-            <div className='text-lg' style={{ color: 'black' }}>{hex}</div> {/* Display hex code in black color */}
-            {selectedMainWallColor && selectedSideWallColor &&
-              `Main: ${selectedMainWallColor.name}, Side: ${selectedSideWallColor.name}`}
-            {selectedMainWallColor && !selectedSideWallColor &&
-              `Main: ${selectedMainWallColor.name}`}
-            {!selectedMainWallColor && selectedSideWallColor &&
-              `Side: ${selectedSideWallColor.name}`}
-          </>
-        ) : (
-          <span>Select Flower</span>
-        )}
-      </div>
-      <div className="flex justify-center items-center col-span-2 h-[40px] border border-black">
-        <select
-          onChange={(e) => onRoomChange(e.target.value)}
-          className="bg-transparent text-black"
-        >
-          <option value="bedroom">Bedroom</option>
-          <option value="livingroom">Living Room</option>
-        </select>
-      </div>
-    </div>
+    ) : (
+      <span>Select Flower</span>
+    )}
+  </div>
+
+  {/* RoomSelector on the right */}
+  <RoomSelector onRoomChange={onRoomChange} />
+</div>
+
+
+
   );
 };
 
